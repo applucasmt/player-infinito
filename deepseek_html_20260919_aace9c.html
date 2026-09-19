@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Infinito • Vídeo + Música de Fundo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #0b0e14 0%, #1a1f2c 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .player-container {
+            background: rgba(18, 22, 30, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 32px;
+            padding: 28px 32px;
+            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            max-width: 1000px;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            font-weight: 500;
+            letter-spacing: -0.5px;
+            color: #eef4ff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 22px;
+            border-left: 5px solid #3b82f6;
+            padding-left: 18px;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 span {
+            background: #2a3442;
+            font-size: 0.8rem;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-weight: 400;
+            color: #b0c8ff;
+            letter-spacing: 0.3px;
+            margin-left: 8px;
+        }
+
+        .video-wrapper {
+            position: relative;
+            background: #000;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 15px 30px -8px black;
+            margin-bottom: 24px;
+            aspect-ratio: 16 / 9;
+            width: 100%;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: contain;
+            background: #0b0b0f;
+            cursor: pointer;
+        }
+
+        .video-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            padding: 30px 18px 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .video-wrapper:hover .video-controls {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .fullscreen-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: white;
+            font-size: 1.5rem;
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            transition: 0.2s;
+            line-height: 1;
+        }
+
+        .fullscreen-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+            border-color: white;
+        }
+
+        .fullscreen-btn:active {
+            transform: scale(0.95);
+        }
+
+        .status-badge {
+            margin-left: auto;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.85rem;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 6px 14px;
+            border-radius: 40px;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            pointer-events: none;
+        }
+
+        .control-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            align-items: flex-start;
+            margin-top: 8px;
+        }
+
+        .file-group {
+            flex: 1 1 240px;
+            background: #141a24;
+            border-radius: 24px;
+            padding: 20px 18px;
+            border: 1px solid #2c3543;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+        }
+
+        .file-group h3 {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #9bb2d0;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: -0.2px;
+        }
+
+        .file-group h3 i {
+            font-style: normal;
+            font-size: 1.2rem;
+        }
+
+        .input-file-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: block;
+            width: 100%;
+            margin-bottom: 12px;
+        }
+
+        .custom-file-btn {
+            background: #1e2632;
+            border: 1.5px dashed #3e4d62;
+            color: #b6c9e5;
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: 0.2s;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+        }
+
+        .custom-file-btn:hover {
+            background: #28323f;
+            border-color: #5a7ba0;
+            color: white;
+        }
+
+        .input-file-wrapper input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-list {
+            margin-top: 12px;
+            max-height: 150px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding-right: 5px;
+        }
+
+        .file-list::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .file-list::-webkit-scrollbar-thumb {
+            background: #3a4557;
+            border-radius: 10px;
+        }
+
+        .file-item {
+            background: #1e2632;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            color: #b8cef0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            border-left: 3px solid #3b82f6;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        /* Áudio ativo (tocando) */
+        .file-item.audio-active {
+            background: #1a2f45;
+            border-left-color: #22c55e;
+            box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.4), 0 0 12px rgba(34, 197, 94, 0.15);
+            color: #ffffff;
+        }
+
+        .file-item.audio-active .play-icon {
+            color: #22c55e;
+        }
+
+        /* Áudio clicável (não ativo) */
+        .file-item.audio-clickable {
+            cursor: pointer;
+        }
+
+        .file-item.audio-clickable:hover {
+            background: #253243;
+            border-left-color: #5a8ae0;
+        }
+
+        .file-item i {
+            font-style: normal;
+            opacity: 0.7;
+            flex-shrink: 0;
+        }
+
+        .file-item .audio-name {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .file-item .play-icon {
+            font-style: normal;
+            font-size: 0.9rem;
+            color: #6b7d96;
+            flex-shrink: 0;
+            width: 16px;
+            text-align: center;
+        }
+
+        .file-item .remove-audio {
+            margin-left: 4px;
+            background: none;
+            border: none;
+            color: #ff8080;
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 8px;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.7;
+            flex-shrink: 0;
+        }
+
+        .file-item .remove-audio:hover {
+            opacity: 1;
+            background: rgba(255, 80, 80, 0.2);
+            color: #ffb3b3;
+        }
+
+        .empty-msg {
+            color: #5e6e83;
+            font-style: italic;
+            font-size: 0.8rem;
+            padding: 8px 4px;
+            text-align: center;
+        }
+
+        .info-text {
+            font-size: 0.75rem;
+            color: #6b7d96;
+            margin-top: 8px;
+            line-height: 1.4;
+            border-top: 1px solid #253040;
+            padding-top: 10px;
+        }
+
+        .audio-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            color: #59b0ff;
+            background: #0f1a2b;
+            padding: 6px 12px;
+            border-radius: 40px;
+            width: fit-content;
+            margin-top: 10px;
+            border: 1px solid #2a405a;
+        }
+
+        .audio-indicator .dot {
+            width: 8px;
+            height: 8px;
+            background: #42e66b;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+
+        .footer-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .btn-reset {
+            background: #212b3a;
+            border: 1px solid #374357;
+            color: #cbd9f0;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-reset:hover {
+            background: #2c384b;
+            border-color: #5f7da0;
+            color: white;
+        }
+
+        @media (max-width: 700px) {
+            .player-container {
+                padding: 18px;
+            }
+            h1 {
+                font-size: 1.3rem;
+            }
+            .video-controls {
+                padding: 20px 12px 10px 12px;
+            }
+            .fullscreen-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="player-container">
+        <h1>
+            🎬 Player Infinito
+            <span>vídeo + loop</span>
+        </h1>
+
+        <!-- Área do vídeo -->
+        <div class="video-wrapper" id="videoWrapper">
+            <video id="mainVideo" loop playsinline muted>
+                Seu navegador não suporta vídeo HTML5.
+            </video>
+            <div class="video-controls">
+                <button class="fullscreen-btn" id="fullscreenBtn" title="Tela cheia">⛶</button>
+                <div class="status-badge" id="videoStatus">Nenhum vídeo selecionado</div>
+            </div>
+        </div>
+
+        <!-- Painel de seleção -->
+        <div class="control-panel">
+            <!-- Vídeo -->
+            <div class="file-group">
+                <h3><i>🎥</i> Vídeo (loop automático)</h3>
+                <div class="input-file-wrapper">
+                    <div class="custom-file-btn">
+                        📁 Selecionar vídeo
+                    </div>
+                    <input type="file" id="videoInput" accept="video/mp4,video/webm,video/ogg,video/quicktime,video/x-matroska">
+                </div>
+                <div class="file-list" id="videoFileInfo">
+                    <div class="empty-msg">Nenhum vídeo carregado</div>
+                </div>
+                <div class="info-text">
+                    O vídeo será reproduzido em loop infinito. Use o botão ⛶ para tela cheia.
+                </div>
+            </div>
+
+            <!-- Áudios de fundo -->
+            <div class="file-group">
+                <h3><i>🎵</i> Músicas de fundo (1 por vez, loop)</h3>
+                <div class="input-file-wrapper">
+                    <div class="custom-file-btn">
+                        🎶 Adicionar arquivos de áudio
+                    </div>
+                    <input type="file" id="audioInput" accept="audio/*" multiple>
+                </div>
+                <div class="file-list" id="audioFilesList">
+                    <div class="empty-msg">Nenhum áudio adicionado</div>
+                </div>
+                <div class="audio-indicator" id="audioIndicator" style="display: none;">
+                    <span class="dot"></span> Trocando faixa... <span id="audioCount"></span>
+                </div>
+                <div class="info-text">
+                    Clique em uma faixa para tocar. Apenas uma toca por vez, em loop. Remova com ✕.
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-actions">
+            <button class="btn-reset" id="resetBtn">
+                ⟲ Limpar tudo
+            </button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ----- Elementos -----
+            const video = document.getElementById('mainVideo');
+            const videoInput = document.getElementById('videoInput');
+            const audioInput = document.getElementById('audioInput');
+            const videoFileInfo = document.getElementById('videoFileInfo');
+            const audioFilesList = document.getElementById('audioFilesList');
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
+            const videoStatus = document.getElementById('videoStatus');
+            const audioIndicator = document.getElementById('audioIndicator');
+            const resetBtn = document.getElementById('resetBtn');
+
+            // ----- Estado dos áudios -----
+            // Cada item: { id, name, url, player, active }
+            let audioTracks = [];
+            let currentAudioId = null;   // qual está tocando agora
+            let nextAudioId = 1;
+
+            // ----- Utilidades -----
+            function formatFileName(name, maxLength = 38) {
+                if (!name) return 'arquivo';
+                if (name.length <= maxLength) return name;
+                const ext = name.lastIndexOf('.') > 0 ? name.slice(name.lastIndexOf('.')) : '';
+                const base = name.slice(0, name.lastIndexOf('.')) || name;
+                return base.slice(0, maxLength - ext.length - 3) + '...' + ext;
+            }
+
+            // Para todos os áudios
+            function stopAllAudio() {
+                audioTracks.forEach(track => {
+                    if (track.player) {
+                        track.player.pause();
+                        track.player.currentTime = 0;
+                    }
+                });
+            }
+
+            // Para um áudio específico
+            function stopAudioTrack(track) {
+                if (track && track.player) {
+                    track.player.pause();
+                    track.player.currentTime = 0;
+                }
+            }
+
+            // Toca um áudio pelo ID (para os outros)
+            function playAudioById(id) {
+                const track = audioTracks.find(t => t.id === id);
+                if (!track || !track.player) return;
+
+                // Para TODOS os outros
+                audioTracks.forEach(t => {
+                    if (t.id !== id && t.player) {
+                        t.player.pause();
+                        t.player.currentTime = 0;
+                    }
+                });
+
+                // Garante que está em loop e toca
+                track.player.loop = true;
+                track.player.play().catch(err => {
+                    console.warn('Erro ao tocar áudio:', err);
+                });
+
+                currentAudioId = id;
+                updateAudioListUI();
+            }
+
+            // Atualiza a UI da lista de áudios
+            function updateAudioListUI() {
+                audioFilesList.innerHTML = '';
+
+                if (audioTracks.length === 0) {
+                    audioFilesList.innerHTML = '<div class="empty-msg">Nenhum áudio adicionado</div>';
+                    audioIndicator.style.display = 'none';
+                    return;
+                }
+
+                audioIndicator.style.display = 'flex';
+                const activeTrack = audioTracks.find(t => t.id === currentAudioId);
+                const countEl = document.getElementById('audioCount');
+                if (countEl) {
+                    countEl.textContent = activeTrack
+                        ? `▶ ${formatFileName(activeTrack.name, 20)}`
+                        : 'Nenhum tocando';
+                }
+
+                audioTracks.forEach(track => {
+                    const isActive = track.id === currentAudioId;
+                    const div = document.createElement('div');
+                    div.className = 'file-item' + (isActive ? ' audio-active' : ' audio-clickable');
+                    div.dataset.id = track.id;
+                    div.innerHTML = `
+                        <span class="play-icon">${isActive ? '▶' : '○'}</span>
+                        <i>🎵</i>
+                        <span class="audio-name">${formatFileName(track.name)}</span>
+                        <button class="remove-audio" data-id="${track.id}" title="Remover áudio">✕</button>
+                    `;
+
+                    // Clique no item (exceto no botão remover) toca a faixa
+                    div.addEventListener('click', (e) => {
+                        if (e.target.closest('.remove-audio')) return;
+                        playAudioById(track.id);
+                    });
+
+                    audioFilesList.appendChild(div);
+                });
+
+                // Eventos de remoção
+                document.querySelectorAll('.remove-audio').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const id = parseInt(btn.getAttribute('data-id'), 10);
+                        removeAudioById(id);
+                    });
+                });
+            }
+
+            // Remove um áudio pelo ID
+            function removeAudioById(id) {
+                const index = audioTracks.findIndex(t => t.id === id);
+                if (index === -1) return;
+
+                const track = audioTracks[index];
+
+                // Para e limpa o player
+                if (track.player) {
+                    track.player.pause();
+                    track.player.src = '';
+                    track.player.load();
+                }
+                if (track.url) {
+                    URL.revokeObjectURL(track.url);
+                }
+
+                audioTracks.splice(index, 1);
+
+                // Se era o que estava tocando, para todos e limpa o current
+                if (currentAudioId === id) {
+                    currentAudioId = null;
+                    stopAllAudio();
+                }
+
+                updateAudioListUI();
+            }
+
+            // Adiciona múltiplos arquivos de áudio
+            function addAudioFiles(files) {
+                if (!files || files.length === 0) return;
+
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    if (!file.type.startsWith('audio/')) {
+                        console.warn('Ignorado (não é áudio):', file.name);
+                        continue;
+                    }
+
+                    const url = URL.createObjectURL(file);
+                    const player = new Audio(url);
+                    player.loop = true;
+                    player.volume = 0.7;
+
+                    const track = {
+                        id: nextAudioId++,
+                        name: file.name,
+                        url: url,
+                        player: player,
+                        active: false
+                    };
+
+                    audioTracks.push(track);
+                }
+
+                // Se nenhum está tocando e temos faixas, toca a primeira automaticamente
+                if (currentAudioId === null && audioTracks.length > 0) {
+                    playAudioById(audioTracks[0].id);
+                } else {
+                    updateAudioListUI();
+                }
+            }
+
+            // Remove todos os áudios
+            function clearAllAudio() {
+                audioTracks.forEach(track => {
+                    if (track.player) {
+                        track.player.pause();
+                        track.player.src = '';
+                        track.player.load();
+                    }
+                    if (track.url) {
+                        URL.revokeObjectURL(track.url);
+                    }
+                });
+                audioTracks = [];
+                currentAudioId = null;
+                updateAudioListUI();
+            }
+
+            // Atualiza info do vídeo
+            function updateVideoInfo(fileName) {
+                if (!fileName) {
+                    videoFileInfo.innerHTML = '<div class="empty-msg">Nenhum vídeo carregado</div>';
+                    videoStatus.textContent = 'Nenhum vídeo selecionado';
+                    return;
+                }
+                videoFileInfo.innerHTML = `
+                    <div class="file-item" style="border-left-color: #3b82f6;">
+                        <i>🎬</i> ${formatFileName(fileName)}
+                    </div>
+                `;
+                videoStatus.textContent = `▶ ${formatFileName(fileName, 25)}`;
+            }
+
+            // Carrega vídeo
+            function loadVideoFile(file) {
+                if (!file) return;
+                if (!file.type.startsWith('video/')) {
+                    alert('Por favor, selecione um arquivo de vídeo válido.');
+                    return;
+                }
+
+                if (video.src && video.src.startsWith('blob:')) {
+                    URL.revokeObjectURL(video.src);
+                }
+
+                const videoUrl = URL.createObjectURL(file);
+                video.src = videoUrl;
+                video.loop = true;
+                video.muted = false;
+
+                video.play().catch(err => {
+                    console.warn('Autoplay do vídeo bloqueado:', err);
+                });
+
+                updateVideoInfo(file.name);
+                video.dataset.fileName = file.name;
+            }
+
+            // Reset geral
+            function resetAll() {
+                video.pause();
+                if (video.src && video.src.startsWith('blob:')) {
+                    URL.revokeObjectURL(video.src);
+                }
+                video.src = '';
+                video.load();
+                video.dataset.fileName = '';
+                videoFileInfo.innerHTML = '<div class="empty-msg">Nenhum vídeo carregado</div>';
+                videoStatus.textContent = 'Nenhum vídeo selecionado';
+
+                clearAllAudio();
+
+                videoInput.value = '';
+                audioInput.value = '';
+
+                if (document.fullscreenElement) {
+                    document.exitFullscreen().catch(() => {});
+                }
+            }
+
+            // ----- Event Listeners -----
+
+            videoInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) loadVideoFile(file);
+            });
+
+            audioInput.addEventListener('change', (e) => {
+                const files = e.target.files;
+                if (files && files.length > 0) {
+                    addAudioFiles(files);
+                }
+                audioInput.value = '';
+            });
+
+            fullscreenBtn.addEventListener('click', () => {
+                const wrapper = document.getElementById('videoWrapper');
+                if (!document.fullscreenElement) {
+                    wrapper.requestFullscreen().catch(err => {
+                        alert('Não foi possível entrar em tela cheia: ' + err.message);
+                    });
+                } else {
+                    document.exitFullscreen().catch(() => {});
+                }
+            });
+
+            document.addEventListener('fullscreenchange', () => {
+                const wrapper = document.getElementById('videoWrapper');
+                const isFullscreen = document.fullscreenElement === wrapper;
+                fullscreenBtn.textContent = isFullscreen ? '✕' : '⛶';
+                fullscreenBtn.title = isFullscreen ? 'Sair da tela cheia' : 'Tela cheia';
+            });
+
+            resetBtn.addEventListener('click', resetAll);
+
+            video.addEventListener('click', () => {
+                if (!video.src) return;
+                if (video.paused) {
+                    video.play().catch(() => {});
+                } else {
+                    video.pause();
+                }
+            });
+
+            video.addEventListener('ended', () => {
+                video.currentTime = 0;
+                video.play().catch(() => {});
+            });
+
+            // Inicializa
+            updateAudioListUI();
+            updateVideoInfo(null);
+        })();
+    </script>
+</body>
+</html>
